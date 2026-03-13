@@ -18,7 +18,6 @@ import { PORTFOLIO_DATA } from './portfolio.data';
 export class App implements AfterViewInit, OnDestroy {
   protected readonly portfolio = PORTFOLIO_DATA;
   protected readonly sections = [
-    { label: 'Home', href: '#home' },
     { label: 'About', href: '#about' },
     { label: 'Experience', href: '#experience' },
     { label: 'Projects', href: '#projects' },
@@ -26,6 +25,7 @@ export class App implements AfterViewInit, OnDestroy {
     { label: 'Contact', href: '#contact' }
   ];
   protected currentHeaderLabel = this.portfolio.name;
+  protected mobileNavOpen = false;
   private readonly isBrowser: boolean;
   private cleanupCallbacks: Array<() => void> = [];
   private activeSectionId = '';
@@ -72,6 +72,43 @@ export class App implements AfterViewInit, OnDestroy {
     return icon ?? 'fa-regular fa-file-lines';
   }
 
+  protected toggleMobileNav(): void {
+    this.mobileNavOpen = !this.mobileNavOpen;
+  }
+
+  protected closeMobileNav(): void {
+    this.mobileNavOpen = false;
+  }
+
+  protected navigateToSection(event: Event, href: string): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const sectionId = href.replace('#', '');
+    const target = document.getElementById(sectionId);
+    if (!target) {
+      return;
+    }
+
+    const wasMobileNavOpen = this.mobileNavOpen;
+    this.closeMobileNav();
+    this.setActiveSection(sectionId, true);
+
+    const offset = window.innerWidth <= 720 ? 92 : 108;
+    const scrollToTarget = () => {
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({
+        top: Math.max(0, top),
+        behavior: 'smooth'
+      });
+    };
+
+    window.setTimeout(scrollToTarget, wasMobileNavOpen ? 180 : 0);
+  }
+
   private bindTapHaptics(): void {
     const interactiveNodes = document.querySelectorAll<HTMLAnchorElement>(
       '.nav-links a, .hero-actions a, .closing-actions a, .brand, .contact-card a'
@@ -90,22 +127,9 @@ export class App implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const setActiveSection = (sectionId: string) => {
-      if (sectionId === this.activeSectionId) {
-        return;
-      }
-
-      this.activeSectionId = sectionId;
-      this.currentHeaderLabel =
-        sectionId === 'home' && window.scrollY < 32
-          ? this.portfolio.name
-          : this.getSectionLabel(sectionId);
-      this.triggerHaptic(8, 90);
-    };
-
     const syncFromScroll = () => {
       if (window.scrollY < 32) {
-        this.activeSectionId = 'home';
+        this.activeSectionId = 'about';
         this.currentHeaderLabel = this.portfolio.name;
       }
     };
@@ -126,7 +150,7 @@ export class App implements AfterViewInit, OnDestroy {
           return;
         }
 
-        setActiveSection(bestMatch.id);
+        this.setActiveSection(bestMatch.id);
       },
       {
         root: null,
@@ -141,11 +165,15 @@ export class App implements AfterViewInit, OnDestroy {
 
     window.addEventListener('scroll', syncFromScroll, { passive: true });
     window.addEventListener('load', syncFromScroll, { passive: true });
+    window.addEventListener('resize', this.closeMobileNavOnDesktop, { passive: true });
     syncFromScroll();
 
     this.cleanupCallbacks.push(() => this.observer?.disconnect());
     this.cleanupCallbacks.push(() => window.removeEventListener('scroll', syncFromScroll));
     this.cleanupCallbacks.push(() => window.removeEventListener('load', syncFromScroll));
+    this.cleanupCallbacks.push(() =>
+      window.removeEventListener('resize', this.closeMobileNavOnDesktop)
+    );
   }
 
   private triggerHaptic(duration: number, cooldown = 0): void {
@@ -166,4 +194,24 @@ export class App implements AfterViewInit, OnDestroy {
   private getSectionLabel(sectionId: string): string {
     return this.sections.find((section) => section.href === `#${sectionId}`)?.label ?? this.portfolio.name;
   }
+
+  private setActiveSection(sectionId: string, skipHaptic = false): void {
+    if (sectionId === this.activeSectionId) {
+      return;
+    }
+
+    this.activeSectionId = sectionId;
+    this.currentHeaderLabel =
+      sectionId === 'about' && window.scrollY < 32 ? this.portfolio.name : this.getSectionLabel(sectionId);
+
+    if (!skipHaptic) {
+      this.triggerHaptic(8, 90);
+    }
+  }
+
+  private closeMobileNavOnDesktop = (): void => {
+    if (window.innerWidth > 720) {
+      this.mobileNavOpen = false;
+    }
+  };
 }

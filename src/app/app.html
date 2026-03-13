@@ -1,13 +1,32 @@
 <div class="page-shell">
   <header class="topbar">
-    <a class="brand" href="#home">{{ currentHeaderLabel }}</a>
+    <a class="brand" href="#about" (click)="navigateToSection($event, '#about')">{{ currentHeaderLabel }}</a>
 
-    <nav class="nav-links" aria-label="Primary">
+    <button
+      class="nav-toggle"
+      type="button"
+      (click)="toggleMobileNav()"
+      [attr.aria-expanded]="mobileNavOpen"
+      aria-controls="primary-nav"
+      aria-label="Toggle navigation"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav
+      id="primary-nav"
+      class="nav-links"
+      [class.nav-links--open]="mobileNavOpen"
+      aria-label="Primary"
+    >
       @for (item of sections; track item.href) {
         <a
           [href]="item.href"
           [class.is-active]="isSectionActive(item.href)"
           [attr.aria-current]="isSectionActive(item.href) ? 'page' : null"
+          (click)="navigateToSection($event, item.href)"
         >
           {{ item.label }}
         </a>
@@ -16,7 +35,7 @@
   </header>
 
   <main class="portfolio-page">
-    <section id="home" class="hero section-card" data-section>
+    <section id="about" class="hero section-card" data-section>
       <div class="hero-copy">
         <p class="eyebrow">{{ portfolio.intro }}</p>
         <h1>{{ portfolio.role }}</h1>
@@ -72,7 +91,7 @@
       </aside>
     </section>
 
-    <section id="about" class="content-grid" data-section>
+    <section class="content-grid">
       <article class="section-card section-panel">
         <div class="section-heading">
           <p>About</p>
