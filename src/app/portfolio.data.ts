@@ -10,9 +10,9 @@ export const PORTFOLIO_DATA: PortfolioData = {
   summary:
     'Software developer with 4+ years of hands-on experience designing, developing, and improving web applications. Strong in Angular-based frontend architecture, UI delivery, performance tuning, and cross-team collaboration in Agile environments.',
   availability: 'Open to impactful frontend and full-stack product roles.',
-  resumeHref: '/assets/documents/JishnuV_AngularDeveloper_Resume.pdf',
+  resumeHref: 'assets/documents/JishnuV_AngularDeveloper_Resume.pdf',
   portrait: {
-    src: '/assets/images/jishnu-portrait.webp',
+    src: 'assets/images/jishnu-portrait.webp',
     alt: 'Portrait of Jishnu V'
   },
   metrics: [
@@ -25,7 +25,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
     { label: 'Call me', href: 'tel:+919645792624', icon: 'fa-solid fa-phone' },
     {
       label: 'Download resume',
-      href: '/assets/documents/JishnuV_AngularDeveloper_Resume.pdf',
+      href: 'assets/documents/JishnuV_AngularDeveloper_Resume.pdf',
       icon: 'fa-regular fa-file-lines'
     }
   ],
